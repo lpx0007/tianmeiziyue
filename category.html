@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品分类</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            padding-bottom: 80px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 15px;
+            padding-bottom: 70px;  /* 为底部导航栏留出空间 */
+        }
+
+        /* 页面布局 */
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 195px; /* 进一步增加顶部填充，防止内容被顶部固定元素遮挡 */
+        }
+
+        /* 顶部标题 */
+        .page-title {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #99cccc;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 搜索和分类导航容器 */
+        .search-category-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            padding: 12px 15px 5px 15px;
+            position: relative;
+        }
+
+        .search-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 6px 12px;
+            position: relative;
+        }
+
+        .search-container:focus-within {
+            background: white;
+            box-shadow: 0 0 0 2px #99cccc;
+        }
+
+        .search-icon {
+            color: #99cccc;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .search-container input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 4px;
+            outline: none;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .clear-btn {
+            color: #999;
+            background: none;
+            border: none;
+            padding: 0 5px;
+            cursor: pointer;
+            display: none;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            background: #99cccc;
+            color: white;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .search-btn i {
+            font-size: 14px;
+        }
+
+        /* 顶部分类导航 */
+        .top-category-nav {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 5px 15px 10px 15px;
+        }
+
+        .top-category-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .top-category-list {
+            display: flex;
+            padding: 0;
+            list-style: none;
+        }
+
+        .top-category-item {
+            padding: 8px 15px;
+            margin-right: 10px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .top-category-item.active {
+            background: #99cccc;
+            color: white;
+        }
+
+        /* 右侧产品网格 */
+        .products-container {
+            flex: 1;
+            padding: 10px 15px 0 15px;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            height: 150px;
+            width: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 150px !important;
+            height: 150px !important;
+            object-fit: cover;
+            flex-shrink: 0;
+            border-radius: 12px 0 0 12px;
+        }
+
+        /* 清除浏览器缓存的方法 - 增加一个随机查询参数 */
+        img.product-image {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        .product-info {
+            flex: 1;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .product-category {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .product-description {
+            color: #555;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            color: #99cccc;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 底部导航栏 */
+        .navbar {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            padding: 12px;
+            z-index: 1000;
+            border-radius: 30px;
+            width: 75%;
+            max-width: 400px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            padding: 5px 12px;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #99cccc;
+            background: rgba(153, 204, 204, 0.1);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        .nav-item:hover {
+            color: #99cccc;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .page-container {
+                flex-direction: column;
+                padding-top: 175px; /* 移动端也增加顶部填充 */
+                padding-bottom: 70px;
+            }
+            
+            .page-title {
+                padding: 12px;
+            }
+
+            .page-title h1 {
+                font-size: 18px;
+            }
+
+            .search-category-container {
+                top: 45px;
+            }
+
+            .top-category-item {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .product-card {
+                height: 150px;
+            }
+            
+            .product-image {
+                width: 150px !important;
+                height: 150px !important;
+            }
+            
+            .product-title {
+                font-size: 15px;
+                margin-bottom: 4px;
+            }
+            
+            .product-price {
+                font-size: 16px;
+            }
+
+            .navbar {
+                width: 85%;
+            }
+        }
+
+        /* 更小的屏幕优化 */
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .product-card {
+                height: 130px;
+            }
+            
+            .product-image {
+                width: 130px !important;
+                height: 130px !important;
+            }
+            
+            .product-info {
+                padding: 6px 8px;
+            }
+            
+            .product-title {
+                font-size: 14px;
+                margin-bottom: 3px;
+            }
+            
+            .product-description {
+                font-size: 11px;
+                -webkit-line-clamp: 1;
+                margin-bottom: 3px;
+            }
+            
+            .product-price {
+                font-size: 14px;
+            }
+            
+            .navbar {
+                width: 90%;
+                bottom: 10px;
+            }
+        }
+
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部标题 -->
+    <div class="page-title">
+        <h1>产品分类</h1>
+    </div>
+
+    <div class="page-container">
+        <!-- 搜索栏和分类导航容器 -->
+        <div class="search-category-container">
+            <div class="search-bar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" placeholder="搜索产品..." id="searchInput">
+                    <button class="clear-btn" id="clearBtn">×</button>
+                    <button class="search-btn">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 顶部分类导航 -->
+            <div class="top-category-nav">
+                <ul class="top-category-list">
+                    <li class="top-category-item active" data-category="all">全部</li>
+                    <li class="top-category-item" data-category="光电">光电</li>
+                    <li class="top-category-item" data-category="中胚">中胚</li>
+                    <li class="top-category-item" data-category="微创">微创</li>
+                    <li class="top-category-item" data-category="刷酸">刷酸</li>
+                    <li class="top-category-item" data-category="护理">护理</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧产品网格 -->
+        <div class="products-container">
+            <div class="products-grid" id="productsGrid">
+                <!-- 产品卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </a>
+            <a href="category.html" class="nav-item active">
+                <i class="fas fa-th-large"></i>
+                <span>分类</span>
+            </a>
+            <a href="address.html" class="nav-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>地址</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="products.js"></script>
+    <script>
+        const productsGrid = document.getElementById('productsGrid');
+        productsGrid.innerHTML = '';
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.title}" class="product-image" width="150" height="150">
+                <div class="product-info">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-category">${product.category}</div>
+                    <p class="product-description">专业美容服务，为您提供高品质的个性化护理方案。</p>
+                    <div class="product-price">${product.price}</div>
+                </div>
+            `;
+            productsGrid.appendChild(productCard);
+        });
+
+        // 检查URL中是否有搜索参数
+        function checkUrlSearchParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            
+            if (searchParam) {
+                // 将搜索参数填入搜索框
+                document.getElementById('searchInput').value = searchParam;
+                document.getElementById('clearBtn').style.display = 'block';
+                
+                // 执行搜索
+                filterProducts(searchParam);
+            }
+        }
+
+        // 页面加载完成后检查URL参数
+        window.addEventListener('DOMContentLoaded', checkUrlSearchParam);
+
+        // 搜索框相关功能
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // 监听输入框内容变化
+        searchInput.addEventListener('input', function() {
+            clearBtn.style.display = this.value ? 'block' : 'none';
+            
+            // 实时搜索
+            const searchTerm = this.value.toLowerCase().trim();
+            filterProducts(searchTerm);
+        });
+
+        // 清空按钮点击事件
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            this.style.display = 'none';
+            searchInput.focus();
+            
+            // 重置搜索结果
+            filterProducts('');
+            
+            // 清除URL参数
+            const url = new URL(window.location);
+            url.searchParams.delete('search');
+            window.history.replaceState({}, '', url);
+        });
+
+        // 搜索按钮点击事件
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            filterProducts(searchTerm);
+            
+            // 更新URL参数
+            const url = new URL(window.location);
+            if (searchTerm) {
+                url.searchParams.set('search', searchTerm);
+            } else {
+                url.searchParams.delete('search');
+            }
+            window.history.replaceState({}, '', url);
+        });
+
+        // 顶部分类选择事件
+        const topCategoryItems = document.querySelectorAll('.top-category-item');
+        topCategoryItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // 移除所有active类
+                topCategoryItems.forEach(item => item.classList.remove('active'));
+                
+                // 添加当前item的active类
+                this.classList.add('active');
+                
+                // 获取分类
+                const category = this.getAttribute('data-category');
+                
+                // 重新渲染
+                renderProducts(category);
+                
+                // 清空搜索框
+                if (searchInput.value) {
+                    searchInput.value = '';
+                    clearBtn.style.display = 'none';
+                }
+            });
+        });
+        
+        // 渲染产品列表
+        function renderProducts(category = 'all') {
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = '';
+            
+            const filteredProducts = category === 'all' 
+                ? products 
+                : products.filter(product => product.category === category);
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.title}" class="product-image" width="150" height="150">
+                    <div class="product-info">
+                        <div>
+                            <h3 class="product-title">${product.title}</h3>
+                            <div class="product-category">${product.category}</div>
+                            <p class="product-description">专业美容服务，为您提供高品质的个性化护理方案。</p>
+                        </div>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                `;
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        // 搜索产品过滤函数
+        function filterProducts(searchTerm) {
+            if (searchTerm === '') {
+                // 如果搜索词为空，显示当前分类的产品
+                const activeCategory = document.querySelector('.top-category-item.active').getAttribute('data-category');
+                renderProducts(activeCategory);
+                return;
+            }
+            
+            // 过滤匹配搜索词的产品
+            const filteredProducts = products.filter(product => 
+                product.title.toLowerCase().includes(searchTerm) || 
+                product.category.toLowerCase().includes(searchTerm)
+            );
+            
+            // 更新显示
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = '';
+            
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = '<div class="no-results">没有找到匹配的产品</div>';
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.title}" class="product-image" width="150" height="150">
+                    <div class="product-info">
+                        <div>
+                            <h3 class="product-title">${product.title}</h3>
+                            <div class="product-category">${product.category}</div>
+                            <p class="product-description">专业美容服务，为您提供高品质的个性化护理方案。</p>
+                        </div>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                `;
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        // 初始渲染所有产品
+        renderProducts();
+    </script>
+</body>
+</html>

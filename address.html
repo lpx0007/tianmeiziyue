@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址位置</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 基础样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+
+        /* 广告画面 */
+        .ad-banner {
+            width: 100%;
+            height: 300px;  /* 调整高度以适应图片 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ad-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* 填充整个容器 */
+            object-position: center;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 15px;
+            padding-bottom: 70px;  /* 为底部导航栏留出空间 */
+        }
+
+        /* 地图容器 */
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        /* 地图信息卡片 */
+        .map-info-card {
+            position: absolute;
+            bottom: 90px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #99cccc, #66cccc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .info-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .info-title {
+            flex: 1;
+        }
+
+        .info-title h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .info-title p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .info-details {
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .detail-item i {
+            color: #99cccc;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .detail-item p {
+            color: #555;
+            font-size: 15px;
+        }
+
+        /* 底部导航栏 */
+        .navbar {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            padding: 12px;
+            z-index: 1000;
+            border-radius: 30px;
+            width: 75%;
+            max-width: 400px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            padding: 5px 12px;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #99cccc;
+            background: rgba(153, 204, 204, 0.1);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        .nav-item:hover {
+            color: #99cccc;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .ad-banner {
+                height: 150px;
+            }
+            
+            #map-container {
+                bottom: 0;
+            }
+
+            .map-info-card {
+                bottom: 80px;
+                left: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+            
+            .info-header {
+                margin-bottom: 12px;
+            }
+
+            .info-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .info-icon i {
+                font-size: 22px;
+            }
+
+            .info-title h2 {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+
+            .info-title p {
+                font-size: 13px;
+            }
+
+            .info-details {
+                padding-top: 12px;
+            }
+
+            .detail-item {
+                margin-bottom: 8px;
+            }
+
+            .detail-item i {
+                font-size: 18px;
+                margin-right: 8px;
+            }
+
+            .detail-item p {
+                font-size: 14px;
+            }
+
+            .navbar {
+                width: 85%;
+            }
+        }
+
+        /* 更小的屏幕优化 */
+        @media (max-width: 480px) {
+            .ad-banner {
+                height: 120px;
+            }
+            
+            .map-info-card {
+                bottom: 70px;
+                padding: 12px;
+            }
+            
+            .info-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .info-icon i {
+                font-size: 20px;
+            }
+
+            .info-title h2 {
+                font-size: 15px;
+            }
+
+            .info-title p {
+                font-size: 12px;
+            }
+
+            .detail-item i {
+                font-size: 16px;
+            }
+
+            .detail-item p {
+                font-size: 13px;
+            }
+
+            .navbar {
+                width: 90%;
+                bottom: 10px;
+            }
+        }
+
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body>
+    <!-- 广告画面 -->
+    <div class="ad-banner">
+        <img src="https://example.com/ad-banner.jpg" alt="田美子悦医疗美容广告">
+    </div>
+
+    <!-- 地图容器 -->
+    <div id="map-container"></div>
+
+    <!-- 地图信息卡片 -->
+    <div class="map-info-card">
+        <div class="info-header">
+            <div class="info-icon">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="info-title">
+                <h2>田美子悦医疗美容诊所</h2>
+                <p>专业医疗美容服务</p>
+            </div>
+        </div>
+        <div class="info-details">
+            <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>广西壮族自治区柳州市城中区解放北路1号</p>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <p>营业时间: 09:00 - 20:00</p>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-phone"></i>
+                <p>联系电话: 0772-8888888</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </a>
+            <a href="category.html" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>分类</span>
+            </a>
+            <a href="address.html" class="nav-item active">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>地址</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 高德地图API -->
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=您的高德地图API密钥"></script>
+    <script>
+        // 初始化地图
+        var map = new AMap.Map('map-container', {
+            zoom: 16,  // 缩放级别
+            center: [109.4000, 24.3000]  // 柳州市中心位置
+        });
+        
+        // 创建标记
+        var marker = new AMap.Marker({
+            position: [109.4000, 24.3000],
+            title: '田美子悦医疗美容诊所',
+            icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png'
+        });
+        
+        // 将标记添加到地图
+        map.add(marker);
+        
+        // 创建信息窗体
+        var infoWindow = new AMap.InfoWindow({
+            isCustom: true,  // 使用自定义窗体
+            content: '<div style="padding:10px;background:#99cccc;color:white;border-radius:5px;">' +
+                     '<h3>田美子悦医疗美容诊所</h3>' +
+                     '<p>广西壮族自治区柳州市城中区解放北路1号</p>' +
+                     '<p>联系电话: 0772-8888888</p>' +
+                     '</div>',
+            offset: new AMap.Pixel(0, -30)
+        });
+        
+        // 点击标记时打开信息窗体
+        marker.on('click', function() {
+            infoWindow.open(map, marker.getPosition());
+        });
+        
+        // 自适应地图显示范围
+        map.setFitView();
+    </script>
+</body>
+</html>
